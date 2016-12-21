@@ -10,7 +10,6 @@ use UNIVERSAL::Object;
 use MIME::Base64 ();
 use Digest::SHA  ();
 use Data::UUID   ();
-use Path::Tiny   ();
 
 use AAA::Util;
 use AAA::Util::Secrets;

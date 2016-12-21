@@ -3,6 +3,8 @@ package AAA::Util::Secrets;
 use strict;
 use warnings;
 
+use Path::Tiny ();
+
 our $VERSION = '0.01';
 
 sub get_share_dir {
