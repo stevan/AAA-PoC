@@ -7,6 +7,7 @@ our $VERSION = '0.01';
 
 use UNIVERSAL::Object;
 
+use Carp         ();
 use MIME::Base64 ();
 use Digest::SHA  ();
 use Data::UUID   ();
@@ -28,7 +29,7 @@ sub BUILD {
 	);
 	
 	if ( $self->{key} ) {
-		die 'Invalid key, got: ' . $self->{key} . ' expected: ' . $key
+		Carp::confess('Invalid key, got: ' . $self->{key} . ' expected: ' . $key)
 			unless $self->{key} eq $key;
 	}
 	else {
@@ -100,6 +101,10 @@ not needing any centralized storage.
 
 This also allows us to use HTTP Basic Auth to actually pass 
 these back and forth, so it is super easy to handle. 
+
+=head1 SEE ALSO
+
+L<https://tools.ietf.org/html/rfc2617>
 
 =cut
 

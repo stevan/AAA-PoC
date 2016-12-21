@@ -7,10 +7,15 @@ use Plack;
 use Plack::Builder;
 use Plack::Request;
 
+use Plack::Middleware::Auth::Basic;
+use Plack::Middleware::Auth::AccessToken;
+
 use Plack::App::Proxy;
 
 use AAA::Model::APIKey;
 use AAA::Model::Token;
+
+use AAA::Web::Middleware::Auth;
 
 builder {
 
@@ -30,11 +35,29 @@ builder {
 
 	# the proxy ...
 	mount '/' => builder {
-		enable "Auth::Basic", authenticator => sub {
-			my ($id, $key, $env) = @_;
-			return AAA::Model::APIKey->validate( $id, $key );
+		# make sure they have a Key
+		enable '+AAA::Web::Middleware::Auth', scope => 'Key';
+
+		# token management (behind api-key)
+		mount '/token' => builder {
+			mount '/create' => sub {
+				my $env          = $_[0];
+				my $accept       = $env->{HTTP_ACCEPT};
+				my ($key)        = ($env->{HTTP_AUTHORIZATION} =~ /Basic (.*)/);
+
+				my ($content_type, $body) = $accept eq 'application/json'
+					? ('application/json' => AAA::Model::Token->new( key => $key )->to_json)
+					: ('text/plain'       => AAA::Model::Token->new( key => $key )->pack);
+
+				return [200, ['Content-Type', $content_type], [$body]];
+			};
 		};
 
-		Plack::App::Proxy->new( remote => 'http://0:5000/' )->to_app;
+		mount '/' => builder {
+			# make sure they have a Token
+			enable '+AAA::Web::Middleware::Auth', scope => 'Token';
+			# and finally, services ...
+			mount '/' => Plack::App::Proxy->new( remote => 'http://0:5000/' )->to_app;
+		};
 	}
 };
