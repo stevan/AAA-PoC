@@ -18,6 +18,10 @@ sub prepare_app {
 
     # caninical form 
     $self->scope( lc $self->scope );
+
+    die 'You must specify a valid scope for the Auth middleware to operate in (apikey or token)'
+        unless $self->scope eq 'apikey' 
+            || $self->scope eq 'token';
 }
 
 sub call {
@@ -28,13 +32,13 @@ sub call {
 
     my @auth = split /\,\s*/ => $auth_header;
 
-    if ( $self->scope eq 'key' ) {
-        my ($key_header) = grep /^Basic\s+/i, @auth;
+    if ( $self->scope eq 'apikey' ) {
+        my ($key_header) = grep /^APIKey\s+/i, @auth;
 
         return $self->unauthorized('Unable to find auth header for `key` scope')
             unless $key_header;
 
-        my ($key) = ($key_header =~ /^Basic (.*)$/i);
+        my ($key) = ($key_header =~ /^APIKey (.*)$/i);
 
         return $self->unauthorized('Unable to find the key in the auth header, in `key` scope')
             unless $key;
@@ -43,7 +47,7 @@ sub call {
             if AAA::Model::APIKey->validate($key);
     }
     elsif ( $self->scope eq 'token' ) {
-        my ($key_header)   = grep /^Basic\s+/i, @auth;
+        my ($key_header)   = grep /^APIKey\s+/i, @auth;
         my ($token_header) = grep /^Token\s+/i, @auth;
 
         return $self->unauthorized('Unable to find auth header for `key` scope in `token` scope')
@@ -52,7 +56,7 @@ sub call {
         return $self->unauthorized('Unable to find auth header for `token` scope')
             unless $token_header;            
 
-        my ($key)   = ($key_header   =~ /^Basic (.*)$/i);
+        my ($key)   = ($key_header   =~ /^APIKey (.*)$/i);
         my ($token) = ($token_header =~ /^Token (.*)$/i);
 
         return $self->unauthorized('Unable to find the key in the auth header, in `token` scope')
@@ -77,7 +81,7 @@ sub unauthorized {
         401,
         [ 'Content-Type' => 'text/plain',
           'Content-Length' => length $body,
-          'WWW-Authenticate' => 'Basic realm="' . $self->scope . '"' ],
+          'WWW-Authenticate' => 'Basic realm="The Great and Powerful Realm of The ' . ucfirst($self->scope) . '"' ],
         [ $body ],
     ];
 }

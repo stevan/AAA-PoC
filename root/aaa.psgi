@@ -36,7 +36,7 @@ builder {
 	# the proxy ...
 	mount '/' => builder {
 		# make sure they have a Key
-		enable '+AAA::Web::Middleware::Auth', scope => 'Key';
+		enable '+AAA::Web::Middleware::Auth', scope => 'APIKey';
 
 		# token management (behind api-key)
 		mount '/token' => builder {
