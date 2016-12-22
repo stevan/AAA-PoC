@@ -3,14 +3,18 @@ package AAA::Web::Middleware::Auth;
 use strict;
 use warnings;
 
+our $VERSION = '0.01';
+
 use MIME::Base64 ();
 
 use AAA::Model::APIKey;
 use AAA::Model::Token;
 
-use parent 'Plack::Middleware';
+use Plack::Middleware;
 
-use Plack::Util::Accessor qw[ scope ];
+our @ISA; BEGIN { @ISA = ('Plack::Middleware') }
+
+sub scope { $_[0]->{scope} = $_[1] if $_[1]; $_[0]->{scope} }
 
 sub prepare_app {
     my $self = $_[0];
@@ -21,13 +25,13 @@ sub prepare_app {
     # caninical form 
     $self->scope( lc $self->scope );
 
-    die 'You must specify a valid scope for the Auth middleware to operate in (apikey or token)'
+    die 'You must specify a valid scope for the Auth middleware to operate in (apikey or token) not (' . $self->scope . ')'
         unless $self->scope eq 'apikey' 
             || $self->scope eq 'token';
 }
 
 sub call {
-    my($self, $env) = @_;
+    my ($self, $env) = @_;
 
     my $auth_header = $env->{HTTP_AUTHORIZATION}
         or return $self->unauthorized(APIKey => 'No authorization header found');
