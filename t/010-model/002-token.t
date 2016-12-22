@@ -8,9 +8,10 @@ use Test::Fatal;
 
 BEGIN {
 	use_ok('AAA::Model::Token');
+	use_ok('AAA::Model::APIKey');	
 }
 
-our $KEY = 'NjE3NDYxNDQtM0EzQS01NTU1LTQ5NDQtM0Q1MzQzNDE0QzQxOjMzM2RiNTdmYzgxNzY4NDI1ZjIzYmIxMDAwZGM5YzMyZGE1N2JmNzU=';
+our $KEY = AAA::Model::APIKey->unpack('61746144-3A3A-5555-4944-3D5343414C41:333db57fc81768425f23bb1000dc9c32da57bf75');
 
 subtest '... basic test' => sub {
 
@@ -33,7 +34,7 @@ subtest '... basic test' => sub {
 subtest '... messy test' => sub {
 
 	my $TIME = 1234;
-	my $BODY = '1b4e098d1b8036d2c81fa63e80857808662190be';
+	my $BODY = '5427618426f07867dcb9179bed342a109118f9a8';
 
 	my $t = AAA::Model::Token->new( 
 		time => $TIME, 
@@ -58,7 +59,7 @@ subtest '... messy test' => sub {
 subtest '... test errors' => sub {
 	like(
 		exception { AAA::Model::Token->new },
-		qr/^The API key is required/,
+		qr/^Invalid args/,
 		'... got the right error'
 	);
 

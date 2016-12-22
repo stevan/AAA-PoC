@@ -7,8 +7,8 @@ our $VERSION = '0.01';
 
 use UNIVERSAL::Object;
 
-use Carp        ();
-use Digest::SHA ();
+use Carp         ();
+use Scalar::Util ();
 
 use AAA::Util;
 use AAA::Util::Time;
@@ -31,19 +31,23 @@ sub BUILDARGS {
 	Carp::confess('Invalid args, you must pass both `time` and `body` or pass neither')
 		if $args->{time} && not($args->{body})
 		|| $args->{body} && not($args->{time});
+	Carp::confess('Invalid args, `key` must be an instance of AAA::Model::APIKey, not (' . ($args->{key} // 'undef') . ')')
+		unless Scalar::Util::blessed( $args->{key} ) 
+			&& $args->{key}->isa('AAA::Model::APIKey');
 	return $args;
 }
 
 sub BUILD {
 	my ($self, $params) = @_;
 
-	my $body = Digest::SHA::sha1_hex( 
-		join '' => $self->{time}, AAA::Util::Secrets::get_secret(), $self->{key} 
+	my $body = AAA::Util::Secrets::get_digest_of( 
+		$self->{time}, 
+		$self->{key}->pack 
 	);
 	
 	if ( $self->{body} ) {
 		Carp::confess('Invalid token, got: ' . $self->{body} . ' expected: ' . $body)
-			unless $self->{body} eq $body;
+			if $self->{body} ne $body;
 	}
 	else {
 		$self->{body} = $body;
@@ -52,7 +56,7 @@ sub BUILD {
 
 sub validate {
 	my ($class, $token, $key) = @_;
-	return !! eval { $class->unpack( $token, $key ) }
+	return !! eval { $class->unpack( $token, $key ) };
 }
 
 sub pack {

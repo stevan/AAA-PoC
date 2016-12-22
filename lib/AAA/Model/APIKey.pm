@@ -7,10 +7,8 @@ our $VERSION = '0.01';
 
 use UNIVERSAL::Object;
 
-use Carp         ();
-use MIME::Base64 ();
-use Digest::SHA  ();
-use Data::UUID   ();
+use Carp       ();
+use Data::UUID ();
 
 use AAA::Util;
 use AAA::Util::Secrets;
@@ -24,13 +22,11 @@ our %HAS = (
 sub BUILD {
 	my ($self, $params) = @_;
 
-	my $key = Digest::SHA::sha1_hex( 
-		join '' => $self->{id}, AAA::Util::Secrets::get_secret() 
-	);
+	my $key = AAA::Util::Secrets::get_digest_of( $self->{id} );
 	
 	if ( $self->{key} ) {
 		Carp::confess('Invalid key, got: ' . $self->{key} . ' expected: ' . $key)
-			unless $self->{key} eq $key;
+			if $self->{key} ne $key;
 	}
 	else {
 		$self->{key} = $key;
@@ -41,19 +37,18 @@ sub id  { $_[0]->{id}  }
 sub key { $_[0]->{key} }
 
 sub validate {
-	my ($class, $id, $key) = @_;
-	return !! eval { $class->new( id => $id, key => $key ) };
+	my ($class, $apikey) = @_;
+	return !! eval { $class->unpack( $apikey ) };
 }
 
 sub pack {
 	my $self = $_[0];
-	my $data = join ':' => $self->{id}, $self->{key};
-	return MIME::Base64::encode_base64($data, ''); # do not line break here
+	return join ':' => $self->{id}, $self->{key};
 }
 
 sub unpack {
 	my ($class, $data) = @_;
-	my ($id, $key) = split /\:/ => MIME::Base64::decode_base64( $data );
+	my ($id, $key) = split /\:/ => $data;
 	return $class->new( id => $id, key => $key );
 }
 
