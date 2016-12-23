@@ -24,6 +24,12 @@ builder {
 	mount '/' => builder {
 		# make sure they have a Key
 		enable '+AAA::Web::Middleware::Auth', scope => 'APIKey';
+
+		# count some stuff ...
+		enable '+AAA::Web::Middleware::SimpleStats';
+		# and show the stuff we counted ...
+		mount '/stats' => Web::Machine->new( resource => 'AAA::Web::Resource::SimpleStat' )->to_app;
+
 		# token management (behind api-key)
 		mount '/token' => Web::Machine->new( resource => 'AAA::Web::Resource::Token' )->to_app;
 		# the token protected realm 
