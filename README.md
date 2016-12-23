@@ -22,8 +22,8 @@ to find the services.
 Now poke it with a client:
 
 ```
-  export API_KEY=$(curl -v http://0:5000/api-key/create)
-  export TOKEN=$(curl -v http://0:5000/token/create -H "Authorization: APIKey $API_KEY")
+  export API_KEY=$(curl -v http://0:5000/api-key)
+  export TOKEN=$(curl -v http://0:5000/token -H "Authorization: APIKey $API_KEY")
 
   curl -v http://0:5000/ -H "Authorization: APIKey $API_KEY" -H "Authorization: Token $TOKEN"
 ```
@@ -53,8 +53,8 @@ Then start up the AAA proxy server for the APIKey realm, connecting it with the 
 Now poke it with a client:
 
 ```
-  export API_KEY=$(curl -v http://0:5000/api-key/create)
-  export TOKEN=$(curl -v http://0:5000/token/create -H "Authorization: APIKey $API_KEY")
+  export API_KEY=$(curl -v http://0:5000/api-key)
+  export TOKEN=$(curl -v http://0:5000/token -H "Authorization: APIKey $API_KEY")
 
   curl -v http://0:5000/ -H "Authorization: APIKey $API_KEY" -H "Authorization: Token $TOKEN"
 ```
