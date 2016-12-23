@@ -12,30 +12,41 @@ use AAA::Model::APIKey;
 
 use AAA::Web::Header::Authorization;
 
-use Plack::Component;
+use Web::Machine::Resource;
+our @ISA = ('Web::Machine::Resource');
 
-our @ISA = ('Plack::Component');
+sub allowed_methods { ['GET'] }
 
-sub call {
+sub content_types_provided {[
+	{ 'text/plain'       => \&to_text }, # default ...	
+	{ 'application/json' => \&to_json },
+]}
+
+sub api_key { $_[0]->{api_key} }
+
+sub is_authorized {
 	my $self   = $_[0];
-	my $env    = $_[1];
-	my $accept = $env->{HTTP_ACCEPT};
-	my $key    = $env->{'aaa.api_key'};    
+	my $header = $_[1];
 
-	if ( not $key ) {
-		my $h = AAA::Web::Header::Authorization->new_from_env( $env );
-		if ( my $creds = $h->credentials_for_scheme( 'APIKey' ) ) {
-			$key = AAA::Model::APIKey->unpack( $creds );
-		}
+	return unless $header;
+
+	my $h = AAA::Web::Header::Authorization->new_from_header( $header );
+	if ( my $creds = $h->credentials_for_scheme( 'APIKey' ) ) {
+		$self->{api_key} = AAA::Model::APIKey->unpack( $creds );
+		return 1;
 	}
+	
+	return;
+}
 
-	return [ 500, [],['Unable to find valid API key'] ] unless $key;
+sub to_json {  
+	my $self = $_[0];
+	AAA::Model::Token->new( key => $self->api_key )->to_json
+}
 
-	my ($content_type, $body) = defined $accept && $accept eq 'application/json'
-		? ('application/json' => AAA::Model::Token->new( key => $key )->to_json)
-		: ('text/plain'       => AAA::Util::encode_base64( AAA::Model::Token->new( key => $key )->pack ));
-
-	return [ 200, [ 'Content-Type' => $content_type ], [ $body ] ];
+sub to_text {
+	my $self = $_[0];
+	AAA::Util::encode_base64( AAA::Model::Token->new( key => $self->api_key )->pack )
 }
 
 1;

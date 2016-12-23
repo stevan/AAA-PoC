@@ -6,24 +6,20 @@ use warnings;
 our $VERSION = '0.01';
 
 use AAA::Util;
-
 use AAA::Model::APIKey;
 
-use Plack::Component;
+use Web::Machine::Resource;
+our @ISA = ('Web::Machine::Resource');
 
-our @ISA = ('Plack::Component');
+sub allowed_methods { ['GET'] }
 
-sub call {
-	my $self   = $_[0];
-	my $env    = $_[1];
-	my $accept = $env->{HTTP_ACCEPT};
-			
-	my ($content_type, $body) = defined $accept && $accept eq 'application/json'
-		? ('application/json' => AAA::Model::APIKey->new->to_json)
-		: ('text/plain'       => AAA::Util::encode_base64( AAA::Model::APIKey->new->pack ));
+sub content_types_provided {[
+	{ 'text/plain'       => \&to_text }, # default ...	
+	{ 'application/json' => \&to_json },
+]}
 
-	return [ 200, [ 'Content-Type' => $content_type ], [ $body ] ];
-}
+sub to_json { AAA::Model::APIKey->new->to_json }
+sub to_text { AAA::Util::encode_base64( AAA::Model::APIKey->new->pack ) }
 
 1;
 

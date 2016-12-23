@@ -9,7 +9,7 @@ use Plack::Test;
 
 use AAA::Util;
 use AAA::Model::APIKey;
-
+use Web::Machine;
 use HTTP::Request::Common qw[ GET ];
 
 BEGIN {
@@ -19,7 +19,7 @@ BEGIN {
 my $API_KEY = AAA::Util::encode_base64('61746144-3A3A-5555-4944-3D5343414C41:333db57fc81768425f23bb1000dc9c32da57bf75', '');
 
 test_psgi(
-	AAA::Web::App::CreateToken->new->to_app, 
+	Web::Machine->new( resource => 'AAA::Web::App::CreateToken' )->to_app, 
 	sub {
         my $app = shift;
 

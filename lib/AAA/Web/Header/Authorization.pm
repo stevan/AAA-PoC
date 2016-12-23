@@ -16,11 +16,14 @@ our %HAS = (
 
 sub new_from_env {
 	my ($class, $env) = @_;
+	return $class->new_from_header( $env->{HTTP_AUTHORIZATION} );
+}
 
-	my $authorizations = $env->{HTTP_AUTHORIZATION};
+sub new_from_header {
+	my ($class, $header) = @_;
 
 	my %credentials;
-	foreach my $authorization ( split /\,\s+/ => $authorizations ) {
+	foreach my $authorization ( split /\,\s+/ => $header ) {
 		my ($scheme, $credentials) = ($authorization =~ /^(.*)\s+(.*)$/);
 		$credentials{ lc $scheme } = AAA::Util::decode_base64( $credentials );
 	}

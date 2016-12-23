@@ -8,6 +8,7 @@ use Test::Fatal;
 use Plack::Test;
 
 use AAA::Util;
+use Web::Machine;
 
 use HTTP::Request::Common qw[ GET ];
 
@@ -16,7 +17,7 @@ BEGIN {
 }
 
 test_psgi(
-	AAA::Web::App::CreateAPIKey->new->to_app, 
+	Web::Machine->new( resource => 'AAA::Web::App::CreateAPIKey' )->to_app, 
 	sub {
         my $app = shift;
 

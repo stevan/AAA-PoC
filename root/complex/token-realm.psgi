@@ -8,6 +8,8 @@ use Plack::Builder;
 
 use Plack::App::Proxy;
 
+use Web::Machine;
+
 use AAA::Web::App::CreateToken;
 use AAA::Web::Middleware::Auth;
 
@@ -15,7 +17,7 @@ my $SERVICES_REALM = $ENV{'SERVICES_REALM'} || die 'You must specify a `SERVICES
 
 builder {
 	# token management (should be behind an api-key)
-	mount '/token/create' => AAA::Web::App::CreateToken->new->to_app;
+	mount '/token/create' => Web::Machine->new( resource => 'AAA::Web::App::CreateToken' )->to_app;
 	# the token protected realm 
 	mount '/' => builder {
 		# make sure they have a Token

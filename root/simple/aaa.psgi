@@ -8,6 +8,8 @@ use Plack::Builder;
 
 use Plack::App::Proxy;
 
+use Web::Machine;
+
 use AAA::Web::App::CreateAPIKey;
 use AAA::Web::App::CreateToken;
 
@@ -17,13 +19,13 @@ my $SERVICES_REALM = $ENV{'SERVICES_REALM'} || die 'You must specify a `SERVICES
 
 builder {
 	# key management ...
-	mount '/api-key/create' => AAA::Web::App::CreateAPIKey->new->to_app;
+	mount '/api-key/create' => Web::Machine->new( resource => 'AAA::Web::App::CreateAPIKey' )->to_app;
 	# the key protected realm
 	mount '/' => builder {
 		# make sure they have a Key
 		enable '+AAA::Web::Middleware::Auth', scope => 'APIKey';
 		# token management (behind api-key)
-		mount '/token/create' => AAA::Web::App::CreateToken->new->to_app;
+		mount '/token/create' => Web::Machine->new( resource => 'AAA::Web::App::CreateToken' )->to_app;
 		# the token protected realm 
 		mount '/' => builder {
 			# make sure they have a Token
