@@ -17,7 +17,7 @@ my $TOKEN_REALM = $ENV{'TOKEN_REALM'} || die 'You must specify a `TOKEN_REALM` e
 
 builder {
 	# key management ...
-	mount '/api-key/create' => Web::Machine->new( resource => 'AAA::Web::Resource::APIKey' )->to_app;
+	mount '/api-key' => Web::Machine->new( resource => 'AAA::Web::Resource::APIKey' )->to_app;
 	# the key protected realm
 	mount '/' => builder {
 		# make sure they have a Key
