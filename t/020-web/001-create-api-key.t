@@ -13,11 +13,11 @@ use Web::Machine;
 use HTTP::Request::Common qw[ GET ];
 
 BEGIN {
-	use_ok('AAA::Web::Resource::CreateAPIKey');
+	use_ok('AAA::Web::Resource::APIKey');
 }
 
 test_psgi(
-	Web::Machine->new( resource => 'AAA::Web::Resource::CreateAPIKey' )->to_app, 
+	Web::Machine->new( resource => 'AAA::Web::Resource::APIKey' )->to_app, 
 	sub {
         my $app = shift;
 
