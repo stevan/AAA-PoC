@@ -1,4 +1,4 @@
-package AAA::Web::App::CreateToken;
+package AAA::Web::Resource::CreateToken;
 
 use strict;
 use warnings;

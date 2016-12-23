@@ -1,4 +1,4 @@
-package AAA::Web::App::CreateAPIKey;
+package AAA::Web::Resource::CreateAPIKey;
 
 use strict;
 use warnings;

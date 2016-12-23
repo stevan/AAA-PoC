@@ -13,13 +13,13 @@ use Web::Machine;
 use HTTP::Request::Common qw[ GET ];
 
 BEGIN {
-	use_ok('AAA::Web::App::CreateToken');
+	use_ok('AAA::Web::Resource::CreateToken');
 }
 
 my $API_KEY = AAA::Util::encode_base64('61746144-3A3A-5555-4944-3D5343414C41:333db57fc81768425f23bb1000dc9c32da57bf75', '');
 
 test_psgi(
-	Web::Machine->new( resource => 'AAA::Web::App::CreateToken' )->to_app, 
+	Web::Machine->new( resource => 'AAA::Web::Resource::CreateToken' )->to_app, 
 	sub {
         my $app = shift;
 
