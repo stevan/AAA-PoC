@@ -15,20 +15,20 @@ use Plack::Middleware;
 
 our @ISA; BEGIN { @ISA = ('Plack::Middleware') }
 
-sub scope { $_[0]->{scope} = $_[1] if $_[1]; $_[0]->{scope} }
+sub realm { $_[0]->{realm} = $_[1] if $_[1]; $_[0]->{realm} }
 
 sub prepare_app {
     my $self = $_[0];
 
-    die 'You must specify a scope for the Auth middleware to operate in'
-        unless $self->scope;
+    die 'You must specify a realm for the Auth middleware to operate in'
+        unless $self->realm;
 
     # caninical form 
-    $self->scope( lc $self->scope );
+    $self->realm( lc $self->realm );
 
-    die 'You must specify a valid scope for the Auth middleware to operate in (apikey or token) not (' . $self->scope . ')'
-        unless $self->scope eq 'apikey' 
-            || $self->scope eq 'token';
+    die 'You must specify a valid realm for the Auth middleware to operate in (apikey or token) not (' . $self->realm . ')'
+        unless $self->realm eq 'apikey' 
+            || $self->realm eq 'token';
 }
 
 sub call {
@@ -42,10 +42,10 @@ sub call {
     #use Data::Dumper;
     #warn Dumper $auth_header;
 
-    if ( $self->scope eq 'apikey' ) {
+    if ( $self->realm eq 'apikey' ) {
         my $key = $auth_header->credentials_for_scheme( 'APIKey' );
 
-        return $self->unauthorized(APIKey => 'Unable to find the key in the auth header, in `key` scope')
+        return $self->unauthorized(APIKey => 'Unable to find the key in the auth header, in `key` realm')
             unless $key;
 
         if ( AAA::Model::APIKey->validate( $key ) ) {
@@ -56,14 +56,14 @@ sub call {
             return $self->unauthorized(APIKey => 'Unable to validate the API key');
         }
     }
-    elsif ( $self->scope eq 'token' ) {
+    elsif ( $self->realm eq 'token' ) {
         my $key   = $auth_header->credentials_for_scheme( 'APIKey' );
         my $token = $auth_header->credentials_for_scheme( 'Token' );
 
-        return $self->unauthorized(Token => 'Unable to find the key in the auth header, in `token` scope')
+        return $self->unauthorized(Token => 'Unable to find the key in the auth header, in `token` realm')
             unless $key;
 
-        return $self->unauthorized(Token => 'Unable to find the token in the auth header, in `token` scope')
+        return $self->unauthorized(Token => 'Unable to find the token in the auth header, in `token` realm')
             unless $token;     
 
         if ( AAA::Model::APIKey->validate( $key ) ) {
@@ -94,7 +94,7 @@ sub unauthorized {
         [ 
             'Content-Type'     => 'text/plain',
             'Content-Length'   => length $body,
-            'WWW-Authenticate' => $type . ' realm="The Great and Powerful Realm of The ' . ucfirst($self->scope) . '"' 
+            'WWW-Authenticate' => $type . ' realm="The Great and Powerful Realm of The ' . ucfirst($self->realm) . '"' 
         ],
         [ $body ],
     ];

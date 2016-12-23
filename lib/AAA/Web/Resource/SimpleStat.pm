@@ -17,7 +17,13 @@ sub content_types_provided {[
 	{ 'application/json' => \&to_json },
 ]}
 
-sub to_json { AAA::Util->JSON->encode( \%AAA::Web::Middleware::SimpleStats::STATS ) }
+sub to_json { 
+	my %realms;
+	foreach my $realm ( keys %AAA::Web::Middleware::SimpleStats::REALMS ) {
+		$realms{ $realm } = $AAA::Web::Middleware::SimpleStats::REALMS{ $realm }->pack;
+	}
+	AAA::Util->JSON->encode( \%realms ); 
+}
 
 1;
 
