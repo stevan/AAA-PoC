@@ -9,9 +9,9 @@ use Plack::Builder;
 use Plack::App::Proxy;
 
 use AAA::Web::App::CreateAPIKey;
-use AAA::Web::App::CreateToken;
-
 use AAA::Web::Middleware::Auth;
+
+my $TOKEN_REALM = $ENV{'TOKEN_REALM'} || die 'You must specify a `TOKEN_REALM` env variable';
 
 builder {
 	# key management ...
@@ -20,14 +20,7 @@ builder {
 	mount '/' => builder {
 		# make sure they have a Key
 		enable '+AAA::Web::Middleware::Auth', scope => 'APIKey';
-		# token management (behind api-key)
-		mount '/token/create' => AAA::Web::App::CreateToken->new->to_app;
-		# the token protected realm 
-		mount '/' => builder {
-			# make sure they have a Token
-			enable '+AAA::Web::Middleware::Auth', scope => 'Token';
-			# and finally, to the spoils ...
-			Plack::App::Proxy->new( remote => 'http://0:5000/' )->to_app;
-		};
+		# now forward them on ...
+		Plack::App::Proxy->new( remote => $TOKEN_REALM )->to_app
 	};
 };

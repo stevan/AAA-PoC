@@ -5,10 +5,11 @@ use warnings;
 
 our $VERSION = '0.01';
 
-use MIME::Base64 ();
-
+use AAA::Util;
 use AAA::Model::APIKey;
 use AAA::Model::Token;
+
+use AAA::Web::Header::Authorization;
 
 use Plack::Middleware;
 
@@ -33,20 +34,16 @@ sub prepare_app {
 sub call {
     my ($self, $env) = @_;
 
-    my $auth_header = $env->{HTTP_AUTHORIZATION}
-        or return $self->unauthorized(APIKey => 'No authorization header found');
+    return $self->unauthorized(APIKey => 'No authorization header found')
+        unless exists $env->{HTTP_AUTHORIZATION};
 
-    my @auth = split /\,\s*/ => $auth_header;
+    my $auth_header = AAA::Web::Header::Authorization->new_from_env( $env );
+
+    #use Data::Dumper;
+    #warn Dumper $auth_header;
 
     if ( $self->scope eq 'apikey' ) {
-        my ($key_header) = grep /^APIKey\s+/i, @auth;
-
-        return $self->unauthorized(APIKey => 'Unable to find auth header for `key` scope')
-            unless $key_header;
-
-        my ($key) = ($key_header =~ /^APIKey (.*)$/i);
-
-        $key = MIME::Base64::decode_base64( $key );
+        my $key = $auth_header->credentials_for_scheme( 'APIKey' );
 
         return $self->unauthorized(APIKey => 'Unable to find the key in the auth header, in `key` scope')
             unless $key;
@@ -60,26 +57,8 @@ sub call {
         }
     }
     elsif ( $self->scope eq 'token' ) {
-        my ($key_header)   = grep /^APIKey\s+/i, @auth;
-        my ($token_header) = grep /^Token\s+/i, @auth;
-
-        #warn "KEY_HEADER: $key_header";
-        #warn "TOKEN_HEADER: $token_header";
-
-        return $self->unauthorized(Token => 'Unable to find auth header for `key` scope in `token` scope')
-            unless $key_header;
-
-        return $self->unauthorized(Token => 'Unable to find auth header for `token` scope')
-            unless $token_header;            
-
-        my ($key)   = ($key_header   =~ /^APIKey (.*)$/i);
-        my ($token) = ($token_header =~ /^Token (.*)$/i);
-
-        $key   = MIME::Base64::decode_base64( $key );
-        $token = MIME::Base64::decode_base64( $token );
-
-        #warn "KEY: $key";
-        #warn "TOKEN: $token";
+        my $key   = $auth_header->credentials_for_scheme( 'APIKey' );
+        my $token = $auth_header->credentials_for_scheme( 'Token' );
 
         return $self->unauthorized(Token => 'Unable to find the key in the auth header, in `token` scope')
             unless $key;

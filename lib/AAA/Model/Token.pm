@@ -72,12 +72,12 @@ sub unpack {
 
 sub to_json {
 	my $self = $_[0];
-	return AAA::Util::JSON->encode({ time => $self->{time}, body => $self->{body}, key => $self->{key} })
+	return AAA::Util::JSON->encode({ time => $self->{time}, body => $self->{body} })
 }
 
 sub from_json {
-	my ($class, $json) = @_;
-	return $class->new( AAA::Util::JSON->decode( $json ) );
+	my ($class, $json, $key) = @_;
+	return $class->new( %{ AAA::Util::JSON->decode( $json ) }, key => $key );
 }
 
 1;
