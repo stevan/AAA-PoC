@@ -1,7 +1,16 @@
 # AAA - Authorization, Authentication and Accounting
 
 This module is a proof of concept (PoC) hack of a AAA framework, it is 
-meant to be a source for discussion, nothing more.
+meant to be a source for discussion, *nothing more*. 
+
+It is meant to communicate a particular concept of how an AAA framework 
+*might* work, and really only the concepts illustrated here should be 
+discussed, not the specific code. 
+
+# CAVEAT
+
+This is **not** meant to be production ready in any way, shape, or form.
+Did I mention that before? Cool, we are good, you may proceed.
 
 ## Model
 
@@ -48,7 +57,10 @@ protected realms.
 
 ### Accounting
 
-TBD
+Currently this part of the trio is sketched out kind of poorly. The 
+accounting itself is done via AAA::Web::Middleware::SimpleStats and the 
+reporting of those stats is done via AAA::Web::Resource::SimpleStat 
+resource. 
 
 ## Examples
 
