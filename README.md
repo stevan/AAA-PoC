@@ -11,14 +11,15 @@ data models used in this PoC.
 ### Keys
 
 Keys are the base level of entry, they are a tuple of an `id`, 
-in the form of a strifified UUID, and a `key` which is some kind 
+in the form of a stringified UUID, and a `key` which is some kind 
 of digital signature, the simplest form being a SHA of the `id` + 
 some secret value, the more complex form being a packet of 
 encrypted data. 
 
-Keys have no expiration, but they can be revoked. 
+Keys have no expiration, but they can be revoked. Though the 
+process of revoking them is not (yet) specified.
 
-### Token
+### Tokens
 
 Tokens are used for all subsequent entry layers, they are also a
 tuple, but containing different elements. The first item is a 
